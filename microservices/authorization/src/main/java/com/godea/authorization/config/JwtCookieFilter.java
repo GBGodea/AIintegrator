@@ -18,8 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class JwtCookieFilter extends OncePerRequestFilter {
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String START_BEARER = "Bearer ";
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -76,75 +74,9 @@ public class JwtCookieFilter extends OncePerRequestFilter {
 
             response.sendRedirect(request.getRequestURI());
         }
-
-//        if (getAccessToken == null) {
-////            filterChain.doFilter(request, response);
-////            return;
-//            String refreshToken = getRefreshTokenFromCookies(request);
-//            if(refreshToken == null) {
-//                ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED);
-//            }
-//
-//            String newAccessToken = authService.refreshToken(refreshToken);
-//            System.out.println("New access token generated: " + newAccessToken);
-//
-//            // Добавляем новый accessToken в cookies
-//            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
-//            accessTokenCookie.setHttpOnly(true);
-//            accessTokenCookie.setSecure(false);
-//            accessTokenCookie.setPath("/");
-//            accessTokenCookie.setMaxAge(30);
-//            getAccessToken = newAccessToken;
-//
-//            response.addCookie(accessTokenCookie);
-//
-//            filterChain.doFilter(request, response);
-//        }
-
-//        if (jwtService.validate(getAccessToken)) {
-//            // Получаю payload
-//            Claims claims = jwtService.parse(getAccessToken);
-//
-//            Role roleFromClaim = new Role();
-//            roleFromClaim.setName((String) claims.get("role"));
-//
-//            JwtAuthentication jwtAuth = new JwtAuthentication();
-//            jwtAuth.setEmail(claims.getSubject());
-//            jwtAuth.setRole(roleFromClaim);
-//            jwtAuth.setAuthenticated(true);
-//
-//            SecurityContextHolder.getContext().setAuthentication(jwtAuth);
-//
-//            filterChain.doFilter(request, response);
-//        }
-
-
-
-
-//        else {
-//            String refreshToken = getRefreshTokenFromCookies(request);
-//            String newAccessToken = authService.refreshToken(refreshToken);
-//            System.out.println("New access token generated: " + newAccessToken);
-//
-//            // Добавляем новый accessToken в cookies
-//            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
-//            accessTokenCookie.setHttpOnly(true);
-//            accessTokenCookie.setSecure(false);
-//            accessTokenCookie.setPath("/");
-//            accessTokenCookie.setMaxAge(30);
-//
-//            response.addCookie(accessTokenCookie);
-//
-//            System.out.println(getJwtFromCookies(request));
-//
-//            if(!jwtService.validate(newAccessToken)) {
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            }
-//        }
-
     }
 
-    // Достаю bearer token
+    // Достаю accessToken
     private String getJwtFromCookies(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
