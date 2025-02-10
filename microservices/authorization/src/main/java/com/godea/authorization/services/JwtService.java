@@ -17,7 +17,7 @@ import java.util.Date;
 public class JwtService {
     private static final String ROLE = "role";
     // 300 000 - 5 минут до истечения access токена
-    private static final long EXPIRATION_ACCESS_MS = 300_000;
+    private static final long EXPIRATION_ACCESS_MS = 30000;
     // 604800000 - одна неделя до истечения срока действия refresh токена
     private static final long EXPIRATION_REFRESH_MS = 604_800_000;
 
