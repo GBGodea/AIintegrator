@@ -35,11 +35,11 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/roles").hasAuthority(Constants.Roles.ADMIN)
                                 .requestMatchers(HttpMethod.DELETE, "/api/roles/**").hasAuthority(Constants.Roles.ADMIN)
                                 .requestMatchers(HttpMethod.GET, "/api/users/**").hasAnyAuthority(Constants.Roles.USER, Constants.Roles.ADMIN)
-                                .requestMatchers(HttpMethod.POST, "/api/auth/refresh").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/auth/refresh").authenticated()
                                 .anyRequest().denyAll())
                 .sessionManagement(e -> e.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .logout(logout -> logout.logoutUrl("/api/auth/logout").logoutSuccessHandler(((request, response, authentication) -> {
-                    Cookie cookie = new Cookie("jwt", "");
+                    Cookie cookie = new Cookie("refreshToken", "");
                     cookie.setHttpOnly(true);
                     cookie.setPath("/");
                     cookie.setMaxAge(0);
@@ -63,10 +63,11 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/api/users", configuration);
-//        source.registerCorsConfiguration("/api/users/**", configuration);
-//        source.registerCorsConfiguration("/api/auth", configuration);
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/users", configuration);
+        source.registerCorsConfiguration("/api/users/**", configuration);
+        source.registerCorsConfiguration("/api/auth", configuration);
+        source.registerCorsConfiguration("/api/auth/refresh", configuration);
+//        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

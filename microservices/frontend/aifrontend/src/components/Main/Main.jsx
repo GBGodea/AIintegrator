@@ -1,18 +1,18 @@
 import React, { useState } from "react";
-import { fetchWithAuth } from "./api"; // Импортируем обертку
+import { fetchWithAuth } from "../Api/api.js";
 
 // TODO Сделать AutoUpdate Refresh Token
 export default () => {
-    const [id, setId] = useState(""); // Состояние для хранения id
-    const [user, setUser] = useState(null); // Состояние для хранения данных пользователя
-    const [error, setError] = useState(""); // Состояние для хранения ошибки
+    const [id, setId] = useState("");
+    const [user, setUser] = useState(null); 
+    const [error, setError] = useState(""); 
 
     const handleSearch = async (e) => {
-        e.preventDefault(); // Предотвращаем перезагрузку страницы
+        e.preventDefault(); 
 
         try {
             const response = await fetchWithAuth(`http://localhost:8080/api/users/${id}`, {
-                method: "GET"
+                method: "GET",
             });
 
             if (!response.ok) {
@@ -41,12 +41,12 @@ export default () => {
                 <button type="submit">Найти</button>
             </form>
 
-            {error && <p style={{ color: "red" }}>{error}</p>} {/* Отображаем ошибку, если она есть */}
+            {error && <p style={{ color: "red" }}>{error}</p>} 
 
-            {user && ( // Отображаем данные пользователя, если они есть
+            {user && ( 
                 <div>
                     <h2>Данные пользователя:</h2>
-                    <pre>{JSON.stringify(user, null, 2)}</pre> {/* Форматируем JSON для удобного отображения */}
+                    <pre>{JSON.stringify(user, null, 2)}</pre>
                 </div>
             )}
         </div>

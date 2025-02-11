@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -35,7 +36,7 @@ public class AuthController {
             cookie.setHttpOnly(true);
             cookie.setSecure(false);
             cookie.setPath("/");
-            cookie.setMaxAge(30);
+            cookie.setMaxAge(15);
 
             response.addCookie(cookie);
 
@@ -56,43 +57,40 @@ public class AuthController {
         return ResponseEntity.ok("Logged out");
     }
 
-//    @PostMapping("/refresh")
-//    public ResponseEntity<String> refresh(HttpServletRequest request, HttpServletResponse response) {
-//        String refreshToken = null;
-//        if (request.getCookies() != null) {
-//            for (var cookie : request.getCookies()) {
-//                if (cookie.getName().equals("refreshToken")) {
-//                    refreshToken = cookie.getValue();
-//                    System.out.println(refreshToken);
-//                    break;
-//                }
-//            }
-//        }
-//
-//        if (refreshToken == null) {
-//            return ResponseEntity.status(401).body("Refresh token missing");
-//        }
-//
-//        try {
-//            String newAccessToken = authService.refreshToken(refreshToken);
-//            System.out.println("New access token generated: " + newAccessToken);
-//
-//            // Добавляем новый accessToken в cookies
-//            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
-//            accessTokenCookie.setHttpOnly(true);
-//            accessTokenCookie.setSecure(false);
-//            accessTokenCookie.setPath("/");
-//            accessTokenCookie.setMaxAge(60 * 15); // 15 минут жизни accessToken
-//
-//            response.addCookie(accessTokenCookie);
-//
-//            return ResponseEntity.ok(newAccessToken);
-//        } catch (RuntimeException e) {
-//            System.out.println("Error refreshing token: " + e.getMessage());
-//            return ResponseEntity.status(403).body("Invalid or expired refresh token");
-//        }
-//
-////        String newAccessToken = authService.refreshToken(refreshToken);
-////        return ResponseEntity.ok(newAccessToken);
-//    }
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refresh(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if (cookie.getName().equals("refreshToken")) {
+                    refreshToken = cookie.getValue();
+                    System.out.println(refreshToken);
+                    break;
+                }
+            }
+        }
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(401).body("Refresh token missing");
+        }
+
+        try {
+            String newAccessToken = authService.refreshToken(refreshToken);
+            System.out.println("New access token generated: " + newAccessToken);
+
+            // Добавляем новый accessToken в cookies
+            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(false);
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(30);
+
+            response.addCookie(accessTokenCookie);
+
+            return ResponseEntity.ok(newAccessToken);
+        } catch (RuntimeException e) {
+            System.out.println("Error refreshing token: " + e.getMessage());
+            return ResponseEntity.status(403).body("Invalid or expired refresh token");
+        }
+    }
 }

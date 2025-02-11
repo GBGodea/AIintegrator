@@ -3,6 +3,7 @@ package com.godea.authorization.services;
 import com.godea.authorization.models.User;
 import com.godea.authorization.models.dto.JwtRequest;
 import com.godea.authorization.repositories.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
@@ -39,11 +40,12 @@ public class AuthService {
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false) // Изменить на true в prod
+//                .sameSite("Strict")
                 .path("/")
                 .maxAge(Duration.ofDays(7))
-                .sameSite("Strict")
                 .build();
-        response.addHeader("Set-Cookie", String.valueOf(cookie));
+
+        response.addHeader("Set-cookie", String.valueOf(cookie));
 
         return accessToken;
     }

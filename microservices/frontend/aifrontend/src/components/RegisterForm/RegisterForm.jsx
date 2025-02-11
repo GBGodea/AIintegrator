@@ -1,5 +1,8 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import "../../App.css";
+import "./RegisterForm.css";
+import "../../css/RegisterAndLogin.css";
 
 export default () => {
     const [email, setEmail] = useState("");
@@ -21,17 +24,17 @@ export default () => {
     }
 
     return (
-        <div>
+        <div className="background">
             <form action="" method="post">
-                <h1>Регистрация:</h1>
-                <h1>Ваш Email</h1>
+                <h1 className="up-text">Регистрация</h1>
+                <h1 className="left-align">Ваш Email:</h1>
                 <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
-                <h1>Ваш Пароль</h1>
+                <h1 className="left-align">Ваш Пароль:</h1>
                 <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
                 <div>
-                    <button type="submit" onClick={handleClick}>Отправить</button>
+                    <button type="submit" onClick={handleClick}>Регистрация</button>
                 </div>
             </form>
         </div>

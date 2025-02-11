@@ -1,22 +1,32 @@
 // api.js
 export const fetchWithAuth = async (url, options = {}) => {
+    // const [email, setEmail] = useState("");
+    // const [password, setPassword] = useState("");
     let accessToken = localStorage.getItem("accessToken");
 
     if (!options.headers) {
         options.headers = {};
     }
 
+    // const user = { email, password };
     options.headers["Authorization"] = `Bearer ${accessToken}`;
     options.credentials = "include"; // Чтобы куки с refreshToken отправлялись
 
-    let response = await fetch(url, options);
+    console.log(accessToken)
+    console.log(options.headers)
 
-    if (response.status === 401) { 
+    let response = await fetch(url, options);
+    // console.log(response)
+
+    if (response.status === 401 || response.status === 403) { 
         // Если accessToken истек, пробуем обновить
         const refreshResponse = await fetch("http://localhost:8080/api/auth/refresh", {
             method: "POST",
-            credentials: "include"
+            credentials: "include",
+            // body: JSON.stringify(user)
         });
+
+        console.log(refreshResponse)
 
         if (!refreshResponse.ok) {
             console.error("Не удалось обновить токен");

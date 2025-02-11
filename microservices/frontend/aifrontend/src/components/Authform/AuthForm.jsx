@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { useNavigate } from 'react-router-dom';
-import { fetchWithAuth } from "./api"; // Импортируем функцию
+import { createCookie, useNavigate } from 'react-router-dom';
+import { fetchWithAuth } from "../Api/api"; // Импортируем функцию
+import "../../App.css"
+import "../../css/RegisterAndLogin.css";
 
 export default () => {
     const [email, setEmail] = useState("");
@@ -12,10 +14,11 @@ export default () => {
         const user = { email, password };
 
         try {
-            const response = await fetchWithAuth("http://localhost:8080/api/auth", {
+            const response = await fetch("http://localhost:8080/api/auth", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(user),
+                credentials: "include"
             });
 
             console.log("Отправляемые данные:", JSON.stringify(user));
@@ -23,9 +26,12 @@ export default () => {
 
             if (!response.ok) throw new Error("Ошибка авторизации");
 
+            if (response.status === 400) throw new Error("Email is already taken");
+
             const data = await response.json();
+            console.log(data);
             // Сохраняем accessToken в localStorage
-            localStorage.setItem("accessToken", data.accessToken);
+            localStorage.setItem("accessToken", data.accessToken)
             // refreshToken будет автоматически отправлен сервером в cookie (HttpOnly)
             
             console.log("Успешная авторизация!");
@@ -36,11 +42,11 @@ export default () => {
     };
 
     return (
-        <div>
+        <div className="background">
             <form action="" method="post">
-                <h1>Авторизация:</h1>
+                <h1 className="up-text">Добро пожаловать</h1>
 
-                <h1>Ваш Email</h1>
+                <h1 className="left-align">Ваш Email</h1>
                 <input
                     type="email"
                     name="email"
@@ -49,7 +55,7 @@ export default () => {
                     onChange={(e) => setEmail(e.target.value)}
                 />
 
-                <h1>Ваш Пароль</h1>
+                <h1 className="left-align">Ваш Пароль</h1>
                 <input
                     type="password"
                     name="password"
