@@ -1,9 +1,9 @@
 spring:
   application:
-    name: fitnessBot
+    name: ai
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/AI
+    url: jdbc:postgresql://localhost:5432/ai
     username: postgres
     password: postgres
 

@@ -25,18 +25,15 @@ public class JwtCookieFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String requestUri = request.getRequestURI();
 
-        // Разрешаем доступ к /auth независимо от наличия токенов
         if (requestUri.equals("/api/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Если запрос на /refresh, проверяем наличие и валидность refreshToken
         if (requestUri.equals("/api/auth/refresh")) {
             String refreshToken = getRefreshTokenFromCookies(request);
 
             if (refreshToken != null && jwtService.validate(refreshToken)) {
-                // Если refreshToken валиден, обновляем accessToken
                 Claims claims = jwtService.parse(refreshToken);
 
                 Role roleFromClaim = new Role();
@@ -51,14 +48,12 @@ public class JwtCookieFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             } else {
-                // Если refreshToken отсутствует или невалиден, возвращаем 401
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 filterChain.doFilter(request, response);
                 return;
             }
         }
 
-        // Для других запросов проверяем наличие accessToken
         String accessToken = getJwtFromCookies(request);
 
         if (accessToken != null && jwtService.validate(accessToken)) {

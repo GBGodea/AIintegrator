@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -20,12 +19,6 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private AuthService authService;
-
-//    @PostMapping
-//    public ResponseEntity<String> login(@RequestBody JwtRequest request, HttpServletResponse response) {
-//        String accessToken = authService.auth(request, response);
-//        return ResponseEntity.ok(accessToken);
-//    }
 
     @PostMapping
     public ResponseEntity<?> auth(@RequestBody JwtRequest request, HttpServletResponse response) {
@@ -76,9 +69,7 @@ public class AuthController {
 
         try {
             String newAccessToken = authService.refreshToken(refreshToken);
-            System.out.println("New access token generated: " + newAccessToken);
 
-            // Добавляем новый accessToken в cookies
             Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
             accessTokenCookie.setHttpOnly(true);
             accessTokenCookie.setSecure(false);

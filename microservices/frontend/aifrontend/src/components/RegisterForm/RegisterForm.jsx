@@ -31,7 +31,7 @@ export default () => {
                 <input type="email" name="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
                 <h1 className="left-align">Ваш Пароль:</h1>
-                <input type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <input className="input-text" type="password" name="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
                 <div>
                     <button type="submit" onClick={handleClick}>Регистрация</button>
