@@ -19,10 +19,15 @@ spring:
     enabled: true
     change-log: db/changelog/db.changelog-master.yaml
 
-
+logging:
+  level:
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
 
 server:
-  port: 8080
+  port: 8081
   servlet:
     session:
       cookie:
@@ -30,5 +35,6 @@ server:
 
 token:
   signing: ab1d65206d8d3a7202467c325dd62ad6c9949877ed698656f2a77cd963d63c3c33d0a6f62f5f053ef50a1c66836209fbdd000b03cb929229f885f96457c6f155a10b76028b59f414b9adafc36e253fed75a77a89161cc8acadc173ec552bcc24a94d2c7cea19489108e74d91a891f55200e9b1a8425e878771d593dd938d069335775408f11e9135906a1cf6a294b407377da2a704de04fdaa4589883f8d4005248b414944099d5f0e861f65dafcb1929e3c6d3d4376c7e7bb1c2eb7f332fb7ccaae8e8104c287f000273ce3c225cf836f0722ca6f318f7928402df89a85cfb0ec97f750ce05075905b75dbf927955ae759ecfa113dae9c9b3ae4ffe7306a5b9fb21031edec6be38b931bc62bfa831eab639eae81dc2078629559e75e03ecaf446db18147b570b1048017b7baf88e4079ea4fa3033fc7322edb3dcc9918feb62a33b022958ed286e94d408e5511e9a8a6cfed9c44255efe4a6670e3353c6fd27ea6b6cdc0a1ad4230cb37eaf38fc5b821f247e556796a44b18412bbf336ea77ecdf559029137e7a61b0142f84016b1e9329ce280618af2116a56446b322aca5247d0bd9f50054a140351dbe3f1b45bbacb532e37acb68fb26c15aaffbd3e5424ebf10b965826a8b39e764ad944aee44bbf6ba98e3120286485ca81200e6c8de55d5cee67f60b9eb717efc716760b1a220083f1cd908d41d96d84b5a1f1f6adc1
+
 
 #debug: true
