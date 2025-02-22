@@ -26,6 +26,14 @@ spring:
             - Path=/api/users/**
           filters:
             - JwtAuthentication
+        - id: talk_with_duckduckgo
+          uri: http://localhost:8082
+          predicates:
+            - Path=/ai/duckduckgo
+          filters:
+            - JwtAuthentication
+
+
 
 jwt:
   auth:

@@ -19,12 +19,12 @@ spring:
     enabled: true
     change-log: db/changelog/db.changelog-master.yaml
 
-logging:
-  level:
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
+#logging:
+#  level:
+#    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+#    org.springframework.cloud.gateway: DEBUG
+#    org.springframework.security: DEBUG
+#    org.springframework.web: DEBUG
 
 server:
   port: 8081

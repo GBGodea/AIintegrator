@@ -52,7 +52,6 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                         .bodyToMono(String.class)
                         .flatMap(newAccessToken -> {
                             System.out.println("New access token: " + newAccessToken);
-                            // Update the request with the new access token
                             exchange.getRequest().mutate().header("Authorization", "Bearer " + newAccessToken).build();
                             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
                                     .httpOnly(true)
@@ -74,6 +73,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             }
 
             accessToken = getJwtFromCookies(exchange);
+//            System.out.println("Access token: " + accessToken);
 
             if (accessToken != null && jwtService.validate(accessToken)) {
                 Claims claims = jwtService.parse(accessToken);

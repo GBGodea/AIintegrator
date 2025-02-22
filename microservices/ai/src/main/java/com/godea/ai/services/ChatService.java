@@ -1,11 +1,10 @@
 package com.godea.ai.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.godea.ai.models.dto.ChatRequest;
+import com.godea.ai.models.dto.ChatRequestBlackBox;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import jakarta.annotation.PostConstruct;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,52 +13,57 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.util.List;
-
 @Service
 public class ChatService {
-    private List<String> userAgents;
+    private boolean isProccessing = false;
 
-//    public ResponseEntity<String> sendChatRequestGet(ChatRequest chatRequest, HttpHeaders headers) {
-//        HttpEntity<ChatRequest> request = new HttpEntity<>(chatRequest, headers);
-//
-//        RestTemplate rest = new RestTemplate();
-//        return rest.exchange(chatRequest.getApiUrl(), HttpMethod.GET, request, String.class);
-//    }
-
-    public ResponseEntity<String> sendChatRequestPost(ChatRequest chatRequest, HttpHeaders headers) {
+    public ResponseEntity<String> sendChatRequestBlackBox(ChatRequest chatRequest, HttpHeaders headers, String link) {
         HttpEntity<ChatRequest> request = new HttpEntity<>(chatRequest, headers);
 
         RestTemplate rest = new RestTemplate();
-        return rest.exchange(chatRequest.getApiUrl(), HttpMethod.POST, request, String.class);
+        return rest.exchange(link, HttpMethod.POST, request, String.class);
     }
 
-    public String sendBlackBoxMessage(ChatRequest chatRequest) {
-//        chatRequest.setMaxTokens(1024);
+    public ResponseEntity<String> sendChatRequestPostDuckDuckGo(ChatRequest chatRequest, HttpHeaders headers, String link) {
+        HttpEntity<ChatRequest> request = new HttpEntity<>(chatRequest, headers);
+
+        RestTemplate rest = new RestTemplate();
+        return rest.exchange(link, HttpMethod.POST, request, String.class);
+    }
+
+    public String sendBlackBoxMessage(ChatRequestBlackBox chatRequest) {
+        chatRequest.setMaxTokens(1024);
         chatRequest.setModel("deepseek-ai/DeepSeek-V3");
-        chatRequest.setApiUrl("https://api.blackbox.ai/api/chat");
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
 
-        return sendChatRequestPost(chatRequest, headers).getBody();
+        return sendChatRequestBlackBox(chatRequest, headers, "https://api.blackbox.ai").getBody();
     }
 
     // Так как duckduckgo прописывает несколько ответов JSON, но у них разделение идёт по пробелам, поэтому если нет пробела, то я соединяю слова, если есть пробел, то соответсвенно разделяю слова
-    public String sendDuckDuckGoMessage(ChatRequest chatRequest) {
-        String useragent = userAgents.get((int) (Math.random() * userAgents.size()));
-        String duckToken = generateDuckToken(useragent);
+    public String sendDuckDuckGoMessage(ChatRequest chatRequest, String userAgent) {
+        if(isProccessing) {
+            throw new RuntimeException("Wait previous message");
+        }
+        isProccessing = true;
+
+//        String useragent = userAgents.get((int) (Math.random() * userAgents.size()));
+//        String useragent = ;
+        String duckToken = generateDuckToken(userAgent);
+
+        chatRequest.getMessages().get(0).setRole("user");
 
         chatRequest.setModel("gpt-4o-mini");
-        chatRequest.setApiUrl("https://duckduckgo.com/duckchat/v1/chat");
+
+        System.out.println(chatRequest);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "application/json");
-        headers.set("User-Agent", useragent);
+        headers.set("Content-Type", "application/json; charset=UTF-8");
+        headers.set("User-Agent", userAgent);
         headers.set("x-vqd-4", duckToken);
 
         try {
-            ResponseEntity<String> response = sendChatRequestPost(chatRequest, headers);
+            ResponseEntity<String> response = sendChatRequestPostDuckDuckGo(chatRequest, headers, "https://duckduckgo.com/duckchat/v1/chat");
             String[] result = response.getBody().split("\n\n");
 
             StringBuilder message = new StringBuilder();
@@ -76,7 +80,11 @@ public class ChatService {
                 String readyMessage = jsonObject.get("message").getAsString();
                 message.append(readyMessage);
             }
-            return String.valueOf(message);
+            System.out.println(message);
+            JsonObject responseJson = new JsonObject();
+            responseJson.addProperty("text", message.toString());
+            return new Gson().toJson(responseJson);
+//            return "{\"text\": \"" + message.toString() + "\"}";
         } catch (HttpStatusCodeException e) {
             System.err.println("Error: " + e.getStatusCode());
             System.err.println("Response body: " + e.getResponseBodyAsString());
@@ -84,15 +92,9 @@ public class ChatService {
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
             throw new RuntimeException("Response didn't come to server! Please try again later");
+        } finally {
+            isProccessing = false;
         }
-//        throw new RuntimeException("Response didn't come to server! Please try again later");
-    }
-
-    @PostConstruct
-    private void updataUserAgent() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ClassPathResource json = new ClassPathResource("useragent.json");
-        userAgents = mapper.readValue(json.getInputStream(), mapper.getTypeFactory().constructCollectionType(List.class, String.class));
     }
 
     private String generateDuckToken(String userAgent) {
@@ -105,9 +107,5 @@ public class ChatService {
         RestTemplate rest = new RestTemplate();
         HttpHeaders headersFromResponse = rest.exchange("https://duckduckgo.com/duckchat/v1/status", HttpMethod.GET, request, String.class).getHeaders();
         return headersFromResponse.get("x-vqd-4").get(0);
-
-//        ResponseEntity<String> response = sendChatRequestGet(chatRequest, headers);
-//        HttpHeaders headersFromResponse = response.getHeaders();
-//        return headersFromResponse.get("x-vqd-4").get(0);
     }
 }

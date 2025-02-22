@@ -16,6 +16,7 @@
     height: 100%;
     width: 260px;
     display: flex;
+    flex-direction: column;
 }
 
 .wrapper {
@@ -36,7 +37,8 @@
 .answers {
     width: 100%;
     height: 100%;
-    padding: 0 20%;
+    padding: 5% 20%;
+    overflow-y: scroll;
     margin: auto;
 }
 
@@ -51,6 +53,7 @@
 .chat {
     all: unset;
     background-color: var(--sidebar-background-color);
+    /* overflow-y: scroll; */
     width: 100%;
     height: 80%;
     text-align: left;
@@ -73,9 +76,55 @@
     padding: 15px;
     border-radius: 15px;
     resize: none;
+    display: flex;
 }
 
 header {
     position: fixed;
+    width: 100%;
+}
+
+.user {
+    background-color: rgba(47, 40, 90, 0.74);
+    margin: 25px 0;
+    margin-left: auto;
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    width: fit-content;
+    text-align: left;
+}
+
+.assistant {
+    text-align: left;
+}
+
+.buttons {
+    width: 25px;
+}
+
+.button {
+    background-color: white;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.arrow-button {
+    width: 25px;
+    height: 25px;
+}
+
+.upper {
+    height: 20%;
+    width: 100%;
+}
+
+.middle {
+    height: 60%;
+    width: 100%;
+}
+
+.footer {
+    height: 20%;
     width: 100%;
 }
