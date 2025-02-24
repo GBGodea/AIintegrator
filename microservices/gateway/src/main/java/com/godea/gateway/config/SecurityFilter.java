@@ -25,7 +25,6 @@ public class SecurityFilter {
                     authorizeExchangeSpec.anyExchange().permitAll();
                 });
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-//        http.addFilterBefore(JwtAuthenticationGatewayFilterFactory, SecurityWebFiltersOrder.AUTHENTICATION)
 
         return http.build();
     }

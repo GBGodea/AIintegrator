@@ -53,7 +53,6 @@
 .chat {
     all: unset;
     background-color: var(--sidebar-background-color);
-    /* overflow-y: scroll; */
     width: 100%;
     height: 80%;
     text-align: left;
@@ -115,16 +114,94 @@ header {
 }
 
 .upper {
-    height: 20%;
+    height: 15%;
     width: 100%;
 }
 
 .middle {
     height: 60%;
     width: 100%;
+    overflow-y: auto;
 }
 
 .footer {
     height: 20%;
     width: 100%;
+}
+
+.upper img {
+    width: 100px;
+}
+
+.flex-sidebar {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.sidebar {
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.sidebar.open {
+    width: 250px;
+}
+
+.sidebar.closed {
+    width: 60px;
+}
+
+.sidebar .upper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.sidebar .upper img.logo-clickable {
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+}
+
+.sidebar .buttons-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.sidebar .middle {
+    padding: 10px;
+}
+
+.sidebar.closed .middle {
+    display: none;
+}
+
+.sidebar .footer {
+    
+}
+
+.flex-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.chat-item.active {
+    background-color: #e0e0e033;
+}
+
+.sidebarbutton {
+    width: 30px !important;
+    color: white;
+    margin: 3px 0;
 }

@@ -5,7 +5,6 @@ import io.jsonwebtoken.Claims;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -59,32 +58,39 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                                     .path("/")
                                     .maxAge(180)
                                     .build();
-
                             exchange.getResponse().addCookie(accessTokenCookie);
 
-                            return chain.filter(exchange);
+                            Claims claims = jwtService.parse(newAccessToken);
+                            String userId = claims.getSubject();
+                            ServerWebExchange modifiedExchange = exchange.mutate()
+                                    .request(exchange.getRequest().mutate()
+                                            .header("X-User-Id", userId)
+                                            .build())
+                                    .build();
+                            return chain.filter(modifiedExchange);
                         })
                         .onErrorResume(e -> {
                             System.out.println("Failed to refresh access token: " + e.getMessage());
                             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                             return exchange.getResponse().setComplete();
                         });
-
             }
 
             accessToken = getJwtFromCookies(exchange);
-//            System.out.println("Access token: " + accessToken);
-
             if (accessToken != null && jwtService.validate(accessToken)) {
                 Claims claims = jwtService.parse(accessToken);
-//                System.out.println("claims: " + claims);
+                String userId = claims.getSubject();
                 String authorities = claims.get("role", String.class);
                 List<String> userAuthorities = List.of(authorities.split(","));
 
-//                System.out.println("Required Authorities: " + config.getRequiredAuthorities());
-
                 if (hasAuthorities(userAuthorities, config.getRequiredAuthorities())) {
-                    return chain.filter(exchange);
+                    System.out.println("userId: " + userId);
+                    ServerWebExchange modifiedExchange = exchange.mutate()
+                            .request(exchange.getRequest().mutate()
+                                    .header("X-User-Id", userId)
+                                    .build())
+                            .build();
+                    return chain.filter(modifiedExchange);
                 }
             }
 

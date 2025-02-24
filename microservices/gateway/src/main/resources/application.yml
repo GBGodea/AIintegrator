@@ -32,6 +32,13 @@ spring:
             - Path=/ai/duckduckgo
           filters:
             - JwtAuthentication
+        - id: history
+          uri: http://localhost:8082
+          predicates:
+            - Path=/ai/history
+          filters:
+            - JwtAuthentication
+
 
 
 

@@ -1,10 +1,15 @@
 package com.godea.ai.controllers;
 
+import com.godea.ai.models.Chat;
 import com.godea.ai.models.dto.ChatRequest;
 import com.godea.ai.models.dto.ChatRequestBlackBox;
 import com.godea.ai.services.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/ai")
@@ -18,10 +23,19 @@ public class AiChoose {
     }
 
     @PostMapping("/duckduckgo")
-    public String duckduckGo(@RequestBody ChatRequest message,
-                             @RequestHeader(value = "User-Agent", required = false) String userAgent) {
-        System.out.println("Привет");
-        System.out.println(userAgent);
-        return chatService.sendDuckDuckGoMessage(message, userAgent);
+    public ResponseEntity<Map<String, String>> duckduckGo(
+            @RequestBody ChatRequest message,
+            @RequestHeader(value = "User-Agent", required = false) String userAgent,
+            @RequestHeader(value = "X-User-Id", required = true) String userId,
+            @RequestHeader(value = "X-Chat-Id", required = false) String chatId) {
+        Map<String, String> aiResponse = chatService.sendDuckDuckGoMessage(message, userAgent, userId, chatId);
+        return ResponseEntity.ok(aiResponse);
+    }
+    @GetMapping("/history")
+    public ResponseEntity<List<Chat>> getMessageHistory(
+            @RequestHeader(value = "X-User-Id", required = true) String userId,
+            @RequestHeader(value = "X-Chat-Id", required = false) String currentChatId) {
+        List<Chat> chats = chatService.getUserChats(userId, currentChatId);
+        return ResponseEntity.ok(chats);
     }
 }
