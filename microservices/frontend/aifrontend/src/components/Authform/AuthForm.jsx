@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createCookie, useNavigate } from 'react-router-dom';
-import { fetchWithAuth } from "../Api/api"; // Импортируем функцию
+import { fetchWithAuth } from "../Api/api";
 import "../../App.css"
 import "../../css/RegisterAndLogin.css";
 
@@ -29,10 +29,7 @@ export default () => {
             if (response.status === 400) throw new Error("Email is already taken");
 
             const data = await response.json();
-            console.log(data);
-            // Сохраняем accessToken в localStorage
             localStorage.setItem("accessToken", data.accessToken)
-            // refreshToken будет автоматически отправлен сервером в cookie (HttpOnly)
             
             console.log("Успешная авторизация!");
             navigate("/main");

@@ -27,10 +27,8 @@ public class SecurityConfig {
                             .permitAll()
                             .requestMatchers("/api/users/**")
                             .permitAll();
-//                            .hasAnyAuthority(Constants.Roles.USER, Constants.Roles.ADMIN);
                 })
                 .csrf(AbstractHttpConfigurer::disable);
-//                .addFilterBefore(new);
 
         return http.build();
     }

@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { fetchWithAuth } from "../Api/api.js";
 import arrow from "./svg/arrow.svg";
 import logo from "./svg/logo.svg";
-import openSidebar from "./svg/opensidebar.svg"
-import closeSidbear from "./svg/closesidebar.svg"
-import newChat from "./svg/chat.svg"
+import opensidebar from "./svg/opensidebar.svg";
+import closesidebar from "./svg/closesidebar.svg";
+import newChat from "./svg/chat.svg";
+import userIcon from "./svg/user.svg";
 import debounce from "lodash/debounce";
-
 import "./Main.css";
 
 export default () => {
@@ -16,9 +16,15 @@ export default () => {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newEmail, setNewEmail] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [emailError, setEmailError] = useState("");
+    const [userProfile, setUserProfile] = useState({ email: "777@mail.ru", password: "" });
 
     useEffect(() => {
         loadChats();
+        loadUserProfile();
     }, []);
 
     const loadChats = async () => {
@@ -28,19 +34,16 @@ export default () => {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-User-Id": "777@mail.ru",
+                    "X-User-Id": userProfile.email,
                     "X-Chat-Id": currentChatId || ""
                 },
             });
             if (!response.ok) throw new Error(`Failed to load chats: ${response.status}`);
             const chatsData = await response.json();
-            console.log("Received chats:", JSON.stringify(chatsData, null, 2));
 
             const normalizedChats = chatsData.map(chat => {
                 const messages = (chat.messages || []).map(msg => {
-                    console.log("\n\n\n\n\n" + msg.fromUser + "\n\n\n\n\n");
                     const sender = msg.fromUser === true ? "user" : "assistant";
-                    console.log("Normalizing message:", msg.content, "fromUser:", msg.fromUser, "sender:", sender);
                     return {
                         id: msg.id,
                         userId: msg.userId,
@@ -70,6 +73,10 @@ export default () => {
         }
     };
 
+    const loadUserProfile = async () => {
+        setUserProfile({ email: "777@mail.ru", password: "" });
+    };
+
     const sendMsgToAi = async () => {
         if (!userMessage.trim() || isLoading || !currentChatId) return;
 
@@ -94,7 +101,7 @@ export default () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-User-Id": "777@mail.ru",
+                    "X-User-Id": userProfile.email,
                     "X-Chat-Id": currentChatId
                 },
                 body: JSON.stringify(requestBody),
@@ -127,13 +134,12 @@ export default () => {
     const createNewChat = async () => {
         if (isLoading) return;
         setIsLoading(true);
-        console.log("Attempting to create new chat...");
         try {
             const response = await fetchWithAuth("http://localhost:8080/ai/duckduckgo", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-User-Id": "777@mail.ru",
+                    "X-User-Id": userProfile.email,
                     "X-Chat-Id": ""
                 },
                 body: JSON.stringify({ messages: [{ content: "" }] }),
@@ -149,7 +155,6 @@ export default () => {
                 return [...prevChats, newChat];
             });
             setCurrentChatId(newChatId);
-            console.log("New empty chat created with ID: " + newChatId);
         } catch (err) {
             setError("Failed to create new chat: " + err.message);
             console.error("Error creating chat:", err);
@@ -158,7 +163,7 @@ export default () => {
         }
     };
 
-    const createNewChatDebounced = useCallback(debounce(createNewChat, 300), [isLoading]);
+    const createNewChatDebounced = useCallback(debounce(createNewChat, 300), [isLoading, userProfile.email]);
 
     const switchChat = (chatId) => {
         setCurrentChatId(chatId);
@@ -168,6 +173,52 @@ export default () => {
 
     const toggleSidebar = () => {
         setIsSidebarOpen((prev) => !prev);
+    };
+
+    const toggleModal = () => {
+        setIsModalOpen((prev) => !prev);
+        setEmailError("");
+        setNewEmail("");
+        setNewPassword("");
+    };
+
+    const updateUserProfile = async () => {
+        if (!newEmail && !newPassword) {
+            setEmailError("Введите новый email или пароль");
+            return;
+        }
+
+        try {
+            const requestBody = {};
+            if (newEmail) requestBody.email = newEmail;
+            if (newPassword) requestBody.password = newPassword;
+
+            const response = await fetchWithAuth("http://localhost:8080/api/users/update", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-User-Id": userProfile.email
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Ошибка обновления профиля: ${response.status}`);
+            }
+
+            setUserProfile((prev) => ({
+                ...prev,
+                email: newEmail || prev.email,
+                password: newPassword || prev.password
+            }));
+            document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = "/auth";
+        } catch (err) {
+            setEmailError(err.message);
+            console.error("Error updating profile:", err);
+        }
     };
 
     const currentChat = chats.find((chat) => chat.id === currentChatId) || { messages: [] };
@@ -180,11 +231,22 @@ export default () => {
                     <div className="upper">
                         <img src={logo} alt="Logo" onClick={toggleSidebar} className="logo-clickable" />
                         <div className="buttons-container">
-                            <img onClick={toggleSidebar} src={isSidebarOpen ? closeSidbear : openSidebar} className="sidebarbutton"/>
-                            <img onClick={createNewChatDebounced} src={newChat} disabled={isLoading} className="sidebarbutton" />
+                            <button onClick={toggleSidebar} className="toggle-button">
+                                <img
+                                    src={isSidebarOpen ? closesidebar : opensidebar}
+                                    alt={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
+                                    className="toggle-icon"
+                                />
+                            </button>
+                            <img
+                                onClick={createNewChatDebounced}
+                                src={newChat}
+                                alt="New Chat"
+                                className="sidebarbutton"
+                                disabled={isLoading}
+                            />
                         </div>
                     </div>
-                    {isSidebarOpen && (
                         <div className="middle">
                             <h3>Your Chats</h3>
                             <div className="flex-sidebar">
@@ -194,7 +256,6 @@ export default () => {
                                     <p>No chats yet</p>
                                 ) : (
                                     chats.map((chat) => {
-                                        console.log("Rendering chat:", chat.id, "Messages:", chat.messages);
                                         return (
                                             <div
                                                 key={chat.id}
@@ -210,13 +271,18 @@ export default () => {
                                 )}
                             </div>
                         </div>
-                    )}
-                    <div className="footer"></div>
+                    <div className="footer">
+                        <img
+                            src={userIcon}
+                            alt="User Profile"
+                            className="user-icon"
+                            onClick={toggleModal}
+                        />
+                    </div>
                 </div>
                 <div className="main-window">
                     <div className="answers" style={{ whiteSpace: "pre-wrap" }}>
                         {currentChat.messages.map((msg, index) => {
-                            console.log("Rendering message:", msg.sender, "Text:", msg.text);
                             return (
                                 <div key={index} className={msg.sender}>
                                     <p>{msg.text}</p>
@@ -249,6 +315,39 @@ export default () => {
                 </div>
             </div>
             {error && <div className="error">{error}</div>}
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <h2>Update Profile</h2>
+                        <div className="modal-content">
+                            <p>Current Email: {userProfile.email}</p>
+                            <label>
+                                New Email:
+                                <input
+                                    type="email"
+                                    value={newEmail}
+                                    onChange={(e) => setNewEmail(e.target.value)}
+                                    placeholder="Enter new email"
+                                />
+                            </label>
+                            <label>
+                                New Password:
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Enter new password"
+                                />
+                            </label>
+                            {emailError && <p className="error-text">{emailError}</p>}
+                            <div className="modal-buttons">
+                                <button onClick={updateUserProfile}>Save</button>
+                                <button onClick={toggleModal}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

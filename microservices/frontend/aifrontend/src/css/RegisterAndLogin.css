@@ -15,7 +15,6 @@ form {
     background: rebeccapurple;
     border-radius: 0px 50px;
     background-color: var(--background-color-app);
-    /* box-shadow: 5px 5px 5px black; */
     box-shadow: 5px 5px 5px rgb(15, 15, 15);
     position: relative;
 }
@@ -33,16 +32,7 @@ h1 {
     text-align: left;
     font-size: 16px;
     margin-bottom: 8px;
-    /* margin-top: 8px; */
 }
-
-/* .input-text {
-    margin-bottom: 8px;
-    background-color: rgb(255, 0, 0) !important;
-    border: 0.5px solid red;
-    text-align: left;
-    color: red !important;
-} */
 
 input {
     all: unset;

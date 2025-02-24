@@ -8,6 +8,7 @@ import com.godea.ai.repositories.ChatRepository;
 import com.godea.ai.repositories.MessageRepository;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,12 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
+@Transactional
 public class ChatService {
     @Autowired
     private ChatRepository chatRepository;
@@ -179,19 +178,34 @@ public class ChatService {
         System.out.println("Saved AI response: " + content + " for chatId: " + chatId);
     }
 
+    @Transactional
     public List<Chat> getUserChats(String userId, String currentChatId) {
         List<Chat> chats = chatRepository.findByUserId(userId);
         System.out.println("Found " + chats.size() + " chats for userId: " + userId);
+
+        List<Chat> chatsToDelete = new ArrayList<>();
+
         for (Chat chat : chats) {
-            List<Message> messages = messageRepository.findByChatId(chat.getId());
-            System.out.println("Chat " + chat.getId() + " has " + messages.size() + " messages");
-            chat.setMessages(messages);
-            if (messages.isEmpty() && !chat.getId().toString().equals(currentChatId)) {
-                chatRepository.delete(chat);
-                System.out.println("Deleted empty chat: " + chat.getId());
+            System.out.println("Chat " + chat.getId() + " has " + chat.getMessages().size() + " messages");
+            if (chat.getMessages().isEmpty() && !chat.getId().toString().equals(currentChatId)) {
+                chatsToDelete.add(chat);
+                System.out.println("Marked empty chat for deletion: " + chat.getId());
             }
         }
-        chats.removeIf(chat -> chat.getMessages().isEmpty() && !chat.getId().toString().equals(currentChatId));
+
+        for (Chat chat : chatsToDelete) {
+            chatRepository.delete(chat);
+            chats.remove(chat);
+            System.out.println("Deleted empty chat: " + chat.getId());
+        }
+
         return chats;
+    }
+
+    @Transactional
+    public int updateUserId(String oldUserId, String newUserId) {
+        int updatedChats = chatRepository.updateUserId(oldUserId, newUserId);
+        int updatedMessages = messageRepository.updateUserId(oldUserId, newUserId);
+        return updatedChats + updatedMessages;
     }
 }

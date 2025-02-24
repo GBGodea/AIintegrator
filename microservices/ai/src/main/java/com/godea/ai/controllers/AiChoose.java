@@ -3,6 +3,7 @@ package com.godea.ai.controllers;
 import com.godea.ai.models.Chat;
 import com.godea.ai.models.dto.ChatRequest;
 import com.godea.ai.models.dto.ChatRequestBlackBox;
+import com.godea.ai.models.dto.UpdateUserIdRequest;
 import com.godea.ai.services.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,5 +38,17 @@ public class AiChoose {
             @RequestHeader(value = "X-Chat-Id", required = false) String currentChatId) {
         List<Chat> chats = chatService.getUserChats(userId, currentChatId);
         return ResponseEntity.ok(chats);
+    }
+
+    @PutMapping("/update-user-id")
+    public ResponseEntity<String> updateUserId(
+            @RequestHeader("X-User-Id") String oldUserId,
+            @RequestBody UpdateUserIdRequest request) {
+        try {
+            int updatedChats = chatService.updateUserId(oldUserId, request.getNewUserId());
+            return ResponseEntity.ok("User ID updated successfully in chats and messages");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating user ID: " + e.getMessage());
+        }
     }
 }
